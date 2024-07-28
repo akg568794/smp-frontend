@@ -28,11 +28,6 @@ const MusicPlayer = () => {
           console.log('Pausing audio at', data.currentTime);
           audioPlayer.pause();
           setIsPlaying(false);
-        } else if (data.action === 'seek') {
-          console.log('Seeking audio to', data.currentTime);
-          audioPlayer.currentTime = data.currentTime;
-          setCurrentTime(data.currentTime);
-          setProgress((data.currentTime / audioPlayer.duration) * 100);
         }
       }
     };
@@ -142,7 +137,6 @@ const MusicPlayer = () => {
 
     audioPlayer.currentTime = newTime;
     setProgress(newProgress);
-    setCurrentTime(newTime);
   };
 
   return (
