@@ -15,6 +15,7 @@ const MusicPlayer = () => {
     socket.on('sync', (data) => {
       const audioPlayer = audioRef.current;
       if (audioPlayer) {
+        console.log('sync event received:', data);
         if (data.action === 'play') {
           audioPlayer.currentTime = data.currentTime;
           audioPlayer.play();
