@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import io from 'socket.io-client';
 
-const socket = io('http://localhost:3001');
+const socket = io('https://smp-backend.onrender.com');
 
 const MusicPlayer = () => {
   const audioRef = useRef(null);
