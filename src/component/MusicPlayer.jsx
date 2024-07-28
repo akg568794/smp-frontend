@@ -1,21 +1,19 @@
 import React, { useEffect, useRef, useState } from 'react';
 import io from 'socket.io-client';
 
-// Use your backend URL
-const socket = io('https://smp-backend.onrender.com');
+const socket = io('http://localhost:3001');
 
 const MusicPlayer = () => {
   const audioRef = useRef(null);
   const [progress, setProgress] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
+  const [duration, setDuration] = useState(0)
   const [playbackRate, setPlaybackRate] = useState(1);
 
   useEffect(() => {
     socket.on('sync', (data) => {
       const audioPlayer = audioRef.current;
       if (audioPlayer) {
-        console.log('sync event received:', data);
         if (data.action === 'play') {
           audioPlayer.currentTime = data.currentTime;
           audioPlayer.play();
@@ -43,6 +41,7 @@ const MusicPlayer = () => {
       audioPlayer.addEventListener('timeupdate', updateProgress);
     }
 
+    // Clean up the event listener on unmount
     return () => {
       socket.off('sync');
       if (audioPlayer) {
@@ -92,13 +91,15 @@ const MusicPlayer = () => {
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 p-4">
       <div className="bg-white rounded-lg shadow-lg p-4 max-w-xs w-full">
-        <img
-          src="https://images.pexels.com/photos/9653900/pexels-photo-9653900.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
-          alt="Album Art"
-          className="w-full h-64 object-cover rounded-lg mb-4"
-        />
-        <h1 className="text-xl font-bold mb-1">Finer Things</h1>
-        <p className="text-gray-600 mb-4">Casey Veggies & Rockie Fresh</p>
+        <div className="flex justify-center">
+          <img
+            src="https://images.pexels.com/photos/9653900/pexels-photo-9653900.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
+            alt="Album Art"
+            className="w-full h-64 object-cover rounded-lg mb-4"
+          />
+        </div>
+        <h1 className="text-xl font-bold mb-1 text-center">Finer Things</h1>
+        <p className="text-gray-600 mb-4 text-center">Casey Veggies & Rockie Fresh</p>
         <audio
           ref={audioRef}
           className="hidden"
