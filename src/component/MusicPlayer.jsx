@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import io from 'socket.io-client';
 
-const socket = io('https://your-deployed-backend-url');
+// Update the URL to your deployed backend URL
+const socket = io('https://smp-backend.onrender.com');
 
 const MusicPlayer = () => {
   const audioRef = useRef(null);
