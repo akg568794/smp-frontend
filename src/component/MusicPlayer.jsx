@@ -159,7 +159,7 @@ const MusicPlayer = () => {
           className="hidden"
           onSeeked={handleSeeked}
         >
-          <source src="/Krishna-Flute.mp3" type="audio/mp3" />
+          <source src="/khabar-nhii.mp3" type="audio/mp3" />
           Your browser does not support the audio element.
         </audio>
         <div className="flex items-center justify-between mb-4">
