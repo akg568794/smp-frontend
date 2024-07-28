@@ -11,6 +11,7 @@ const MusicPlayer = () => {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
     const audioPlayer = audioRef.current;
@@ -18,13 +19,15 @@ const MusicPlayer = () => {
 
     const handleSync = (data) => {
       if (audioPlayer) {
-        audioPlayer.currentTime = data.currentTime;
         if (data.action === 'play') {
           console.log('Playing audio at', data.currentTime);
+          audioPlayer.currentTime = data.currentTime;
           audioPlayer.play().catch(error => console.error('Error playing audio:', error));
+          setIsPlaying(true);
         } else if (data.action === 'pause') {
           console.log('Pausing audio at', data.currentTime);
           audioPlayer.pause();
+          setIsPlaying(false);
         }
       }
     };
@@ -59,19 +62,21 @@ const MusicPlayer = () => {
 
   const handlePlay = () => {
     const audioPlayer = audioRef.current;
-    if (audioPlayer) {
+    if (audioPlayer && !isPlaying) {
       console.log('Play button clicked');
       audioPlayer.play().catch(error => console.error('Error playing audio:', error));
       socket.emit('sync', { action: 'play', currentTime: audioPlayer.currentTime });
+      setIsPlaying(true);
     }
   };
 
   const handlePause = () => {
     const audioPlayer = audioRef.current;
-    if (audioPlayer) {
+    if (audioPlayer && isPlaying) {
       console.log('Pause button clicked');
       audioPlayer.pause();
       socket.emit('sync', { action: 'pause', currentTime: audioPlayer.currentTime });
+      setIsPlaying(false);
     }
   };
 
@@ -82,7 +87,6 @@ const MusicPlayer = () => {
     }
   };
 
-  
   const formatTime = (time) => {
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
@@ -196,7 +200,6 @@ const MusicPlayer = () => {
           <span>{formatTime(currentTime)}</span>
           <span>{formatTime(duration)}</span>
         </div>
-        
       </div>
     </div>
   );
