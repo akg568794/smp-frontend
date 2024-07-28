@@ -15,12 +15,16 @@ const MusicPlayer = () => {
     if (!audioPlayer) return;
 
     const handleSync = (data) => {
-      console.log('sync event received', data);
+      // console.log('sync event received', data);
       if (audioPlayer) {
-        audioPlayer.currentTime = data.currentTime;
+        if (data.currentTime !== audioPlayer.currentTime) {
+          audioPlayer.currentTime = data.currentTime;
+        }
         if (data.action === 'play') {
+          console.log('Playing audio at', data.currentTime);
           audioPlayer.play().catch(error => console.error('Error playing audio:', error));
         } else if (data.action === 'pause') {
+          console.log('Pausing audio at', data.currentTime);
           audioPlayer.pause();
         }
       }
@@ -38,12 +42,18 @@ const MusicPlayer = () => {
       }
     };
 
+    const handleAudioError = (error) => {
+      console.error('Audio playback error:', error);
+    };
+
     audioPlayer.addEventListener('timeupdate', updateProgress);
+    audioPlayer.addEventListener('error', handleAudioError);
 
     return () => {
       socket.off('sync', handleSync);
       if (audioPlayer) {
         audioPlayer.removeEventListener('timeupdate', updateProgress);
+        audioPlayer.removeEventListener('error', handleAudioError);
       }
     };
   }, []);
@@ -51,7 +61,14 @@ const MusicPlayer = () => {
   const handlePlay = () => {
     const audioPlayer = audioRef.current;
     if (audioPlayer) {
-      audioPlayer.play().catch(error => console.error('Error playing audio:', error));
+      console.log('Play button clicked');
+      audioPlayer.play()
+        .then(() => {
+          console.log('Audio is playing');
+        })
+        .catch(error => {
+          console.error('Error playing audio:', error);
+        });
       socket.emit('sync', { action: 'play', currentTime: audioPlayer.currentTime });
     }
   };
@@ -59,6 +76,7 @@ const MusicPlayer = () => {
   const handlePause = () => {
     const audioPlayer = audioRef.current;
     if (audioPlayer) {
+      console.log('Pause button clicked');
       audioPlayer.pause();
       socket.emit('sync', { action: 'pause', currentTime: audioPlayer.currentTime });
     }
@@ -67,6 +85,7 @@ const MusicPlayer = () => {
   const handleSeeked = () => {
     const audioPlayer = audioRef.current;
     if (audioPlayer) {
+      // console.log('Seek event detected', audioPlayer.currentTime);
       socket.emit('sync', { action: 'seek', currentTime: audioPlayer.currentTime });
     }
   };
@@ -101,7 +120,7 @@ const MusicPlayer = () => {
           className="hidden"
           onSeeked={handleSeeked}
         >
-          <source src="Krishna-Flute.mp3" type="audio/mp3" />
+          <source src="/Krishna-Flute.mp3" type="audio/mp3" />
           Your browser does not support the audio element.
         </audio>
         <div className="flex items-center justify-between mb-4">
