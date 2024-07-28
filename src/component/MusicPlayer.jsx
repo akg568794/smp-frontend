@@ -143,7 +143,7 @@ const MusicPlayer = () => {
     <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 p-4">
       <div>
         <h1 className="text-4xl font-bold text-center ">
-          Listen with Her
+          Listen with Buddy
         </h1>
       </div>
       <div className="bg-white rounded-lg shadow-lg p-4 max-w-xs w-full">
