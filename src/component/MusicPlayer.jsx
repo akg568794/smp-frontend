@@ -1,14 +1,16 @@
 import React, { useEffect, useRef, useState } from 'react';
 import io from 'socket.io-client';
+import Like from './Like';
 
 const socket = io('https://smp-backend.onrender.com');
 
 const MusicPlayer = () => {
   const audioRef = useRef(null);
+  const progressRef = useRef(null);
   const [progress, setProgress] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [playbackRate, setPlaybackRate] = useState(1);
+  const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => {
     const audioPlayer = audioRef.current;
@@ -16,13 +18,12 @@ const MusicPlayer = () => {
 
     const handleSync = (data) => {
       if (audioPlayer) {
-        const timeDifference = Math.abs(audioPlayer.currentTime - data.currentTime);
-        if (timeDifference > 1) {
-          audioPlayer.currentTime = data.currentTime;
-        }
+        audioPlayer.currentTime = data.currentTime;
         if (data.action === 'play') {
+          console.log('Playing audio at', data.currentTime);
           audioPlayer.play().catch(error => console.error('Error playing audio:', error));
         } else if (data.action === 'pause') {
+          console.log('Pausing audio at', data.currentTime);
           audioPlayer.pause();
         }
       }
@@ -31,7 +32,7 @@ const MusicPlayer = () => {
     socket.on('sync', handleSync);
 
     const updateProgress = () => {
-      if (audioPlayer) {
+      if (audioPlayer && !isDragging) {
         setCurrentTime(audioPlayer.currentTime);
         setProgress((audioPlayer.currentTime / audioPlayer.duration) * 100);
         if (audioPlayer.duration) {
@@ -46,9 +47,6 @@ const MusicPlayer = () => {
 
     audioPlayer.addEventListener('timeupdate', updateProgress);
     audioPlayer.addEventListener('error', handleAudioError);
-    audioPlayer.addEventListener('canplaythrough', () => {
-      console.log('Audio can play through');
-    });
 
     return () => {
       socket.off('sync', handleSync);
@@ -57,11 +55,12 @@ const MusicPlayer = () => {
         audioPlayer.removeEventListener('error', handleAudioError);
       }
     };
-  }, []);
+  }, [isDragging]);
 
   const handlePlay = () => {
     const audioPlayer = audioRef.current;
     if (audioPlayer) {
+      console.log('Play button clicked');
       audioPlayer.play().catch(error => console.error('Error playing audio:', error));
       socket.emit('sync', { action: 'play', currentTime: audioPlayer.currentTime });
     }
@@ -83,23 +82,66 @@ const MusicPlayer = () => {
     }
   };
 
-  const handlePlaybackRateChange = (event) => {
-    const audioPlayer = audioRef.current;
-    const rate = parseFloat(event.target.value);
-    setPlaybackRate(rate);
-    if (audioPlayer) {
-      audioPlayer.playbackRate = rate;
-    }
-  };
-
+  
   const formatTime = (time) => {
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
     return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
   };
 
+  const handleProgressMouseDown = (event) => {
+    setIsDragging(true);
+    handleProgressDrag(event);
+  };
+
+  const handleProgressMouseMove = (event) => {
+    if (isDragging) {
+      handleProgressDrag(event);
+    }
+  };
+
+  const handleProgressMouseUp = () => {
+    setIsDragging(false);
+    handleSeeked();
+  };
+
+  const handleProgressTouchStart = (event) => {
+    setIsDragging(true);
+    handleProgressDrag(event.touches[0]);
+  };
+
+  const handleProgressTouchMove = (event) => {
+    if (isDragging) {
+      handleProgressDrag(event.touches[0]);
+    }
+  };
+
+  const handleProgressTouchEnd = () => {
+    setIsDragging(false);
+    handleSeeked();
+  };
+
+  const handleProgressDrag = (event) => {
+    const audioPlayer = audioRef.current;
+    const progressBar = progressRef.current;
+    if (!audioPlayer || !progressBar) return;
+
+    const rect = progressBar.getBoundingClientRect();
+    const offsetX = event.clientX - rect.left;
+    const newProgress = (offsetX / rect.width) * 100;
+    const newTime = (newProgress / 100) * audioPlayer.duration;
+
+    audioPlayer.currentTime = newTime;
+    setProgress(newProgress);
+  };
+
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 p-4">
+      <div>
+        <h1 className="text-4xl font-bold text-center ">
+          Listen with Her
+        </h1>
+      </div>
       <div className="bg-white rounded-lg shadow-lg p-4 max-w-xs w-full">
         <img
           src="https://images.pexels.com/photos/9653900/pexels-photo-9653900.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
@@ -130,31 +172,31 @@ const MusicPlayer = () => {
             &#10074;&#10074;
           </button>
         </div>
-        <div className="w-full mb-4">
-          <div className="w-full bg-gray-300 h-1 rounded-lg">
-            <div
-              className="bg-blue-600 h-1 rounded-lg"
-              style={{ width: `${progress}%` }}
-            ></div>
-          </div>
-          <div className="flex justify-between mt-2 text-sm text-gray-600">
-            <span>{formatTime(currentTime)}</span>
-            <span>{formatTime(duration)}</span>
+        <div className='flex justify-center mt-[-20px] mb-3 items-center'>
+          <div className=''>
+            <Like/>
           </div>
         </div>
-        <div className="mb-4">
-          <label className="text-gray-600 mr-2">Playback Speed:</label>
-          <select
-            value={playbackRate}
-            onChange={handlePlaybackRateChange}
-            className="px-2 py-1 border border-gray-300 rounded-lg"
-          >
-            <option value="0.5">0.5x</option>
-            <option value="1">1x</option>
-            <option value="1.5">1.5x</option>
-            <option value="2">2x</option>
-          </select>
+        <div
+          className="w-full mb-4 bg-gray-300 h-1 rounded-lg relative cursor-pointer"
+          ref={progressRef}
+          onMouseDown={handleProgressMouseDown}
+          onMouseMove={handleProgressMouseMove}
+          onMouseUp={handleProgressMouseUp}
+          onTouchStart={handleProgressTouchStart}
+          onTouchMove={handleProgressTouchMove}
+          onTouchEnd={handleProgressTouchEnd}
+        >
+          <div
+            className="bg-blue-600 h-1 rounded-lg"
+            style={{ width: `${progress}%` }}
+          ></div>
         </div>
+        <div className="flex justify-between text-sm text-gray-600">
+          <span>{formatTime(currentTime)}</span>
+          <span>{formatTime(duration)}</span>
+        </div>
+        
       </div>
     </div>
   );

@@ -3,3 +3,12 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Playfair+Display:wght@700&family=Lobster&family=Dancing+Script:wght@700&display=swap');
+
+h1 {
+    color: #4b0082;
+    margin-bottom: 25px;
+    font-size: 2.5em; /* Bigger heading */
+    font-family: 'Dancing Script', cursive; /* Different font style */
+    font-weight: bold; /* Bold heading */
+  }
