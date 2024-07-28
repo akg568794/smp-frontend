@@ -1,9 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import io from 'socket.io-client';
 
-// Use the deployed backend URL
 const socket = io('http://localhost:3001');
-
 
 const MusicPlayer = () => {
   const audioRef = useRef(null);
@@ -16,16 +14,19 @@ const MusicPlayer = () => {
     const audioPlayer = audioRef.current;
     if (!audioPlayer) return;
 
-    socket.on('sync', (data) => {
-      if (data.action === 'play') {
+    const handleSync = (data) => {
+      console.log('sync event received', data);
+      if (audioPlayer) {
         audioPlayer.currentTime = data.currentTime;
-        audioPlayer.play().catch(error => console.error('Error playing audio:', error));
-      } else if (data.action === 'pause') {
-        audioPlayer.pause();
-      } else if (data.action === 'seek') {
-        audioPlayer.currentTime = data.currentTime;
+        if (data.action === 'play') {
+          audioPlayer.play().catch(error => console.error('Error playing audio:', error));
+        } else if (data.action === 'pause') {
+          audioPlayer.pause();
+        }
       }
-    });
+    };
+
+    socket.on('sync', handleSync);
 
     const updateProgress = () => {
       if (audioPlayer) {
@@ -40,7 +41,7 @@ const MusicPlayer = () => {
     audioPlayer.addEventListener('timeupdate', updateProgress);
 
     return () => {
-      socket.off('sync');
+      socket.off('sync', handleSync);
       if (audioPlayer) {
         audioPlayer.removeEventListener('timeupdate', updateProgress);
       }
@@ -59,7 +60,7 @@ const MusicPlayer = () => {
     const audioPlayer = audioRef.current;
     if (audioPlayer) {
       audioPlayer.pause();
-      socket.emit('sync', { action: 'pause' });
+      socket.emit('sync', { action: 'pause', currentTime: audioPlayer.currentTime });
     }
   };
 
