@@ -4,6 +4,7 @@ import io from 'socket.io-client';
 // Use the deployed backend URL
 const socket = io('http://localhost:3001');
 
+
 const MusicPlayer = () => {
   const audioRef = useRef(null);
   const [progress, setProgress] = useState(0);
@@ -12,22 +13,21 @@ const MusicPlayer = () => {
   const [playbackRate, setPlaybackRate] = useState(1);
 
   useEffect(() => {
+    const audioPlayer = audioRef.current;
+    if (!audioPlayer) return;
+
     socket.on('sync', (data) => {
-      const audioPlayer = audioRef.current;
-      if (audioPlayer) {
-        if (data.action === 'play') {
-          audioPlayer.currentTime = data.currentTime;
-          audioPlayer.play().catch(error => console.error('Error playing audio:', error));
-        } else if (data.action === 'pause') {
-          audioPlayer.pause();
-        } else if (data.action === 'seek') {
-          audioPlayer.currentTime = data.currentTime;
-        }
+      if (data.action === 'play') {
+        audioPlayer.currentTime = data.currentTime;
+        audioPlayer.play().catch(error => console.error('Error playing audio:', error));
+      } else if (data.action === 'pause') {
+        audioPlayer.pause();
+      } else if (data.action === 'seek') {
+        audioPlayer.currentTime = data.currentTime;
       }
     });
 
     const updateProgress = () => {
-      const audioPlayer = audioRef.current;
       if (audioPlayer) {
         setCurrentTime(audioPlayer.currentTime);
         setProgress((audioPlayer.currentTime / audioPlayer.duration) * 100);
@@ -37,10 +37,7 @@ const MusicPlayer = () => {
       }
     };
 
-    const audioPlayer = audioRef.current;
-    if (audioPlayer) {
-      audioPlayer.addEventListener('timeupdate', updateProgress);
-    }
+    audioPlayer.addEventListener('timeupdate', updateProgress);
 
     return () => {
       socket.off('sync');
