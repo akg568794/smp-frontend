@@ -15,16 +15,14 @@ const MusicPlayer = () => {
     if (!audioPlayer) return;
 
     const handleSync = (data) => {
-      // console.log('sync event received', data);
       if (audioPlayer) {
-        if (data.currentTime !== audioPlayer.currentTime) {
+        const timeDifference = Math.abs(audioPlayer.currentTime - data.currentTime);
+        if (timeDifference > 1) {
           audioPlayer.currentTime = data.currentTime;
         }
         if (data.action === 'play') {
-          console.log('Playing audio at', data.currentTime);
           audioPlayer.play().catch(error => console.error('Error playing audio:', error));
         } else if (data.action === 'pause') {
-          console.log('Pausing audio at', data.currentTime);
           audioPlayer.pause();
         }
       }
@@ -48,6 +46,9 @@ const MusicPlayer = () => {
 
     audioPlayer.addEventListener('timeupdate', updateProgress);
     audioPlayer.addEventListener('error', handleAudioError);
+    audioPlayer.addEventListener('canplaythrough', () => {
+      console.log('Audio can play through');
+    });
 
     return () => {
       socket.off('sync', handleSync);
@@ -61,14 +62,7 @@ const MusicPlayer = () => {
   const handlePlay = () => {
     const audioPlayer = audioRef.current;
     if (audioPlayer) {
-      console.log('Play button clicked');
-      audioPlayer.play()
-        .then(() => {
-          console.log('Audio is playing');
-        })
-        .catch(error => {
-          console.error('Error playing audio:', error);
-        });
+      audioPlayer.play().catch(error => console.error('Error playing audio:', error));
       socket.emit('sync', { action: 'play', currentTime: audioPlayer.currentTime });
     }
   };
@@ -85,7 +79,6 @@ const MusicPlayer = () => {
   const handleSeeked = () => {
     const audioPlayer = audioRef.current;
     if (audioPlayer) {
-      // console.log('Seek event detected', audioPlayer.currentTime);
       socket.emit('sync', { action: 'seek', currentTime: audioPlayer.currentTime });
     }
   };
