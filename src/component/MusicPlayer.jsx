@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import io from 'socket.io-client';
 import Like from './Like';
+import img from "../assets/img.jpeg"
+import img2 from "../assets/img2.jpeg"
 
 const socket = io('https://smp-backend.onrender.com');
 
@@ -148,12 +150,12 @@ const MusicPlayer = () => {
       </div>
       <div className="bg-white rounded-lg shadow-lg p-4 max-w-xs w-full">
         <img
-          src="https://images.pexels.com/photos/9653900/pexels-photo-9653900.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
+          src={img}
           alt="Album Art"
           className="w-full h-64 object-cover rounded-lg mb-4"
         />
         <h1 className="text-xl font-bold mb-1">Finer Things</h1>
-        <p className="text-gray-600 mb-4">Casey Veggies & Rockie Fresh</p>
+        <p className="text-gray-600 mb-4">Makes Bond with every Beat.</p>
         <audio
           ref={audioRef}
           className="hidden"
