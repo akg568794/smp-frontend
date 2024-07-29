@@ -1,15 +1,16 @@
 import React, { useEffect, useRef, useState } from 'react';
 import io from 'socket.io-client';
 import Like from './Like';
-import img from "../assets/img.jpeg"
+import img from "../assets/img.jpeg";
 import MusicDialog from './MusicDialog';
-import TumSe  from '../assets/TumSe.mp3';
+import TumSe from '../assets/TumSe.mp3';
 import Savera from '../assets/Savera.mp3';
-import Mitraz from "../assets/Mitraz.mp3"
+import Mitraz from "../assets/Mitraz.mp3";
 import MastMagan from "../assets/MastMagan.mp3";
 import AankhoSeBatana from "../assets/AankhoSeBatana.mp3";
 import ChannaVe from "../assets/ChannaVe.mp3";
 
+// Initialize socket connection
 const socket = io('https://smp-backend.onrender.com');
 
 const MusicPlayer = () => {
@@ -24,46 +25,16 @@ const MusicPlayer = () => {
   const [selectedMusic, setSelectedMusic] = useState(null);
 
   const musicList = [
-    {
-      title: "Tum Se",
-      description: "Teri Baaton Mein Aisa Uljha Jiya",
-      duration: "2:38",
-      src: TumSe
-    },
-    {
-      title: "Savera",
-      description: "Iqlipse Nova, Anubha Bajaj - Savera",
-      duration: "2:23",
-      src: Savera
-    },
-    {
-      title: "Mitraz",
-      description: "MITRAZ - Akhiyaan",
-      duration: "4:21",
-      src: Mitraz
-    },
-    {
-      title: "Channa Ve",
-      description: "Channa Ve - Lyrical | Vicky Kaushal & Bhumi Pednekar",
-      duration: "4:21",
-      src: ChannaVe
-    },
-    {
-      title: "Mast Magan",
-      description: "Mast Magan Full Song | 2 States | Arijit Singh",
-      duration: "4:21",
-      src: MastMagan
-    },
-    {
-      title: "Aankho Se Batana",
-      description: "Aankhon Se Batana - Dikshant",
-      duration: "4:21",
-      src: AankhoSeBatana
-    },
+    { title: "Tum Se", description: "Teri Baaton Mein Aisa Uljha Jiya", duration: "2:38", src: TumSe },
+    { title: "Savera", description: "Iqlipse Nova, Anubha Bajaj - Savera", duration: "2:23", src: Savera },
+    { title: "Mitraz", description: "MITRAZ - Akhiyaan", duration: "4:21", src: Mitraz },
+    { title: "Channa Ve", description: "Channa Ve - Lyrical | Vicky Kaushal & Bhumi Pednekar", duration: "4:21", src: ChannaVe },
+    { title: "Mast Magan", description: "Mast Magan Full Song | 2 States | Arijit Singh", duration: "4:21", src: MastMagan },
+    { title: "Aankho Se Batana", description: "Aankhon Se Batana - Dikshant", duration: "4:21", src: AankhoSeBatana },
   ];
 
   const handleMusicSelect = (music) => {
-    console.log(music);
+    console.log('Selected Music:', music);
     setSelectedMusic(music);
     setIsDialogOpen(false);
   };
@@ -83,6 +54,9 @@ const MusicPlayer = () => {
           console.log('Pausing audio at', data.currentTime);
           audioPlayer.pause();
           setIsPlaying(false);
+        } else if (data.action === 'seek') {
+          console.log('Seeking to', data.currentTime);
+          audioPlayer.currentTime = data.currentTime;
         }
       }
     };
@@ -99,18 +73,14 @@ const MusicPlayer = () => {
       }
     };
 
-    const handleAudioError = (error) => {
-      console.error('Audio playback error:', error);
-    };
-
     audioPlayer.addEventListener('timeupdate', updateProgress);
-    audioPlayer.addEventListener('error', handleAudioError);
+    audioPlayer.addEventListener('error', error => console.error('Audio playback error:', error));
 
     return () => {
       socket.off('sync', handleSync);
       if (audioPlayer) {
         audioPlayer.removeEventListener('timeupdate', updateProgress);
-        audioPlayer.removeEventListener('error', handleAudioError);
+        audioPlayer.removeEventListener('error', error => console.error('Audio playback error:', error));
       }
     };
   }, [isDragging]);
@@ -208,9 +178,7 @@ const MusicPlayer = () => {
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 p-4">
       <div>
-        <h1 className="text-4xl font-bold text-center ">
-          Listen with Buddy
-        </h1>
+        <h1 className="text-4xl font-bold text-center">Listen with Buddy</h1>
       </div>
       <div className="bg-white rounded-lg shadow-lg p-4 max-w-xs w-full">
         <img
@@ -243,7 +211,7 @@ const MusicPlayer = () => {
           </button>
         </div>
         <div className='flex justify-center mt-[-20px] mb-3 items-center'>
-          <div className=''>
+          <div>
             <Like/>
           </div>
         </div>
@@ -271,13 +239,7 @@ const MusicPlayer = () => {
           )} 
           <span>{formatTime(duration)}</span>
         </div>
-        <div className='flex justify-center items-center text-sm text-gray-600'>
-        {selectedMusic && (
-            <div className="text-indigo-600">
-              <span className="font-semibold">{selectedMusic.title}</span>
-            </div>
-          )}  
-        </div>
+        <div className='flex justify-center items-center text-sm text-gray-600'></div>
         <div className='flex justify-center mt-[-20px] mb-3 items-center'>
           <button
             onClick={() => setIsDialogOpen(true)}
