@@ -2,7 +2,13 @@ import React, { useEffect, useRef, useState } from 'react';
 import io from 'socket.io-client';
 import Like from './Like';
 import img from "../assets/img.jpeg"
-import img2 from "../assets/img2.jpeg"
+import MusicDialog from './MusicDialog';
+import TumSe  from '../assets/TumSe.mp3';
+import Savera from '../assets/Savera.mp3';
+import Mitraz from "../assets/Mitraz.mp3"
+import MastMagan from "../assets/MastMagan.mp3";
+import AankhoSeBatana from "../assets/AankhoSeBatana.mp3";
+import ChannaVe from "../assets/ChannaVe.mp3";
 
 const socket = io('https://smp-backend.onrender.com');
 
@@ -14,6 +20,53 @@ const MusicPlayer = () => {
   const [duration, setDuration] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedMusic, setSelectedMusic] = useState(null);
+
+  const musicList = [
+    {
+      title: "Tum Se",
+      description: "Teri Baaton Mein Aisa Uljha Jiya",
+      duration: "2:38",
+      src: TumSe
+    },
+    {
+      title: "Savera",
+      description: "Iqlipse Nova, Anubha Bajaj - Savera",
+      duration: "2:23",
+      src: Savera
+    },
+    {
+      title: "Mitraz",
+      description: "MITRAZ - Akhiyaan",
+      duration: "4:21",
+      src: Mitraz
+    },
+    {
+      title: "Channa Ve",
+      description: "Channa Ve - Lyrical | Vicky Kaushal & Bhumi Pednekar",
+      duration: "4:21",
+      src: ChannaVe
+    },
+    {
+      title: "Mast Magan",
+      description: "Mast Magan Full Song | 2 States | Arijit Singh",
+      duration: "4:21",
+      src: MastMagan
+    },
+    {
+      title: "Aankho Se Batana",
+      description: "Aankhon Se Batana - Dikshant",
+      duration: "4:21",
+      src: AankhoSeBatana
+    },
+  ];
+
+  const handleMusicSelect = (music) => {
+    console.log(music);
+    setSelectedMusic(music);
+    setIsDialogOpen(false);
+  };
 
   useEffect(() => {
     const audioPlayer = audioRef.current;
@@ -61,6 +114,17 @@ const MusicPlayer = () => {
       }
     };
   }, [isDragging]);
+
+  useEffect(() => {
+    const audioPlayer = audioRef.current;
+    if (!audioPlayer) return;
+
+    if (selectedMusic) {
+      audioPlayer.src = selectedMusic.src;
+      audioPlayer.play().catch(error => console.error('Error playing audio:', error));
+      setIsPlaying(true);
+    }
+  }, [selectedMusic]);
 
   const handlePlay = () => {
     const audioPlayer = audioRef.current;
@@ -161,7 +225,7 @@ const MusicPlayer = () => {
           className="hidden"
           onSeeked={handleSeeked}
         >
-          <source src="/khabar-nhii.mp3" type="audio/mp3" />
+          {selectedMusic && <source src={selectedMusic.src} type="audio/mp3" />}
           Your browser does not support the audio element.
         </audio>
         <div className="flex items-center justify-between mb-4">
@@ -200,7 +264,34 @@ const MusicPlayer = () => {
         </div>
         <div className="flex justify-between text-sm text-gray-600">
           <span>{formatTime(currentTime)}</span>
+          {selectedMusic && (
+            <div className="text-indigo-600">
+              <span className="font-semibold">{selectedMusic.title}</span>
+            </div>
+          )} 
           <span>{formatTime(duration)}</span>
+        </div>
+        <div className='flex justify-center items-center text-sm text-gray-600'>
+        {selectedMusic && (
+            <div className="text-indigo-600">
+              <span className="font-semibold">{selectedMusic.title}</span>
+            </div>
+          )}  
+        </div>
+        <div className='flex justify-center mt-[-20px] mb-3 items-center'>
+          <button
+            onClick={() => setIsDialogOpen(true)}
+            className="px-6 py-3 bg-white text-indigo-600 font-semibold rounded-full shadow-lg transform transition-transform hover:scale-105"
+          >
+            Show More
+          </button>
+          {isDialogOpen && (
+            <MusicDialog 
+              setIsDialogOpen={setIsDialogOpen} 
+              musicList={musicList} 
+              handleMusicSelect={handleMusicSelect}
+            />
+          )}
         </div>
       </div>
     </div>

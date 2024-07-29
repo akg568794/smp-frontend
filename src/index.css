@@ -12,3 +12,34 @@ h1 {
     font-family: 'Dancing Script', cursive; /* Different font style */
     font-weight: bold; /* Bold heading */
   }
+
+/* Custom scrollbar styles */
+/* Custom scrollbar styles */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px; /* Adjust width for cylindrical effect */
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #9a67ea;
+  border-radius: 8px; /* Cylinder effect with wider width */
+  border-radius: 50px; /* Makes thumb more cylindrical */
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #7d4aca;
+}
+
+/* For Firefox */
+.custom-scrollbar {
+  scrollbar-width: thin; /* Adjust thinness for Firefox */
+  scrollbar-color: #9a67ea transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  border-radius: 50px; /* Ensures cylindrical appearance in WebKit */
+}
+
