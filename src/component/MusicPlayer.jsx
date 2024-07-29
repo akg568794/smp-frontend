@@ -281,7 +281,7 @@ const MusicPlayer = () => {
         <div className='flex justify-center mt-[-20px] mb-3 items-center'>
           <button
             onClick={() => setIsDialogOpen(true)}
-            className="px-6 py-3 bg-white text-indigo-600 font-semibold rounded-full shadow-lg transform transition-transform hover:scale-105"
+            className="px-4 py-2 bg-white text-indigo-600 font text-sm rounded-lg border border-1 border-gray-200 shadow-lg transform transition-transform hover:scale-105"
           >
             Show More
           </button>
